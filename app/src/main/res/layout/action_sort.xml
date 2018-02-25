@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Spinner xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.AppCompat.Spinner.DropDown"
+    android:id="@+id/spinner_sort_criteria"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+    android:entries="@array/sort_criteria"/>

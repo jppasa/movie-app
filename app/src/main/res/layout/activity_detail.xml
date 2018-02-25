@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="gt.com.jpvr.movieapp.DetailActivity">
+
+    <!--original title-->
+    <!--movie poster image thumbnail-->
+    <!--A plot synopsis (called overview in the api)-->
+    <!--user rating (called vote_average in the api)-->
+    <!--release date-->
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/iv_detail_movie_poster"
+            android:layout_width="185dp"
+            android:layout_height="278dp"
+            android:contentDescription="@string/movie_poster"
+            android:layout_margin="16dp"
+            android:background="@color/primary"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/iv_detail_movie_poster"
+            android:layout_toEndOf="@id/iv_detail_movie_poster"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:orientation="vertical"
+            android:layout_marginTop="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
+            tools:layout_toRightOf="@+id/iv_detail_movie_poster"
+            tools:layout_toEndOf="@+id/iv_detail_movie_poster">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/accent"
+                android:text="@string/release_date"/>
+
+            <TextView
+                android:id="@+id/tv_release_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                tools:text="2015-08-02" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/rating"
+                android:textColor="@color/accent"
+                android:layout_marginTop="16dp"/>
+
+            <TextView
+                android:id="@+id/tv_user_rating"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                tools:text="8.5/10" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/original_title_language"
+                android:textColor="@color/accent"
+                android:layout_marginTop="16dp"/>
+
+            <TextView
+                android:id="@+id/tv_original_title_language"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Subtitle"
+                tools:text="Pelicula (ES)" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_overview_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/overview"
+            android:layout_marginTop="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_below="@id/iv_detail_movie_poster"
+            android:textColor="@color/accent"
+            tools:layout_below="@+id/iv_detail_movie_poster"/>
+
+        <TextView
+            android:id="@+id/tv_overview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_overview_title"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginStart="16dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            tools:layout_below="@+id/tv_overview_title"
+            tools:text="This is test overview just to kind of see how it would look like on a real phone. Please, do ignore this texts. Stop reading right now. If you are still reading, please, just stop. Stop it. STOP!!!" />
+
+    </RelativeLayout>
+
+</ScrollView>
