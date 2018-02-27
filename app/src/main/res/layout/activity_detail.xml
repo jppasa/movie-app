@@ -77,7 +77,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Subtitle"
-                tools:text="Pelicula (ES)" />
+                tools:text="Película (ES)" />
         </LinearLayout>
 
         <TextView

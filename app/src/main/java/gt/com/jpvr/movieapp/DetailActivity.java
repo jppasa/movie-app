@@ -47,6 +47,9 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Populates all the views with the movie information in {@code mMovie} field.
+     */
     private void populate() {
         ActionBar actionBar = getSupportActionBar();
 
@@ -54,12 +57,14 @@ public class DetailActivity extends AppCompatActivity {
             actionBar.setTitle(mMovie.getTitle());
         }
 
-        if (mMovie.getPosterPath() != null) {
+        if (mMovie.getPosterPath() != null && !mMovie.getPosterPath().isEmpty()) {
             URL posterPath = NetworkUtils.buildImageURL(ImageSize.W185, mMovie.getPosterPath());
 
             Picasso.with(this)
                     .load(posterPath.toString())
                     .into(mPosterImage);
+        } else {
+            mPosterImage.setImageResource(R.drawable.no_poster);
         }
 
         mReleaseDateTextView.setText(mMovie.getReleaseDate());

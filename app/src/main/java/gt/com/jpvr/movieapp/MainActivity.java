@@ -27,12 +27,12 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
     private static final int COLUMN_COUNT = 2;
 
-    SwipeRefreshLayout mSwipeRefreshLayout;
-    RecyclerView mMoviesRecyclerView;
-    TextView mErrorMessage;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private RecyclerView mMoviesRecyclerView;
+    private TextView mErrorMessage;
 
-    MovieAdapter mMovieAdapter;
-    SortCriteria mCurrentCriteria;
+    private MovieAdapter mMovieAdapter;
+    private SortCriteria mCurrentCriteria;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +45,12 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         mMoviesRecyclerView = (RecyclerView) findViewById(R.id.rv_movies);
         mErrorMessage = (TextView) findViewById(R.id.tv_error_message);
 
-        mMovieAdapter = new MovieAdapter(this);
-        mMovieAdapter.setClickHandler(this);
+        mMovieAdapter = new MovieAdapter(this, new MovieAdapter.MovieAdapterOnClickHandler() {
+            @Override
+            public void onClick(Movie movie) {
+                launchDetailView(movie);
+            }
+        });
 
         mMoviesRecyclerView.setLayoutManager(new GridLayoutManager(this, COLUMN_COUNT));
         mMoviesRecyclerView.setAdapter(mMovieAdapter);
@@ -100,14 +104,16 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     }
 
     /**
-     * Show progress bar and run AsyncTask to fetch movies from server with the sorting criteria
-     * the user has selected.
+     * Hide error message and show recyclerView.
      */
     private void showMovies() {
         mErrorMessage.setVisibility(View.INVISIBLE);
         mMoviesRecyclerView.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Show error message and hide recyclerView.
+     */
     private void showErrorMessage() {
         mErrorMessage.setVisibility(View.VISIBLE);
         mMoviesRecyclerView.setVisibility(View.GONE);
@@ -118,12 +124,20 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         launchDetailView(movie);
     }
 
+    /**
+     * Launches DetailActivity passing the {@code movie} as an extra.
+     *
+     * @param movie The Movie object to show at the DetailActivity
+     */
     private void launchDetailView(Movie movie) {
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra(DetailActivity.EXTRA_MOVIE, movie);
         startActivity(intent);
     }
 
+    /**
+     * AsyncTask to fetch a list of movies according to the criteria selected by the user.
+     */
     public class FetchMovieList extends AsyncTask<String, Void, List<Movie>> {
         @Override
         protected void onPreExecute() {

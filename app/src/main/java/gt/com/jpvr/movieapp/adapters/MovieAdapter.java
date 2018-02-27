@@ -26,13 +26,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
     private final Context context;
     private List<Movie> mMovies;
-    private MovieAdapterOnClickHandler mClickHandler;
+    private final MovieAdapterOnClickHandler mClickHandler;
 
-    public MovieAdapter(Context context) {
+    public MovieAdapter(Context context, MovieAdapterOnClickHandler clickHandler) {
         this.context = context;
-    }
-
-    public void setClickHandler(MovieAdapterOnClickHandler clickHandler) {
         this.mClickHandler = clickHandler;
     }
 
@@ -48,11 +45,15 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
         holder.mMovieTitle.setText(movie.getTitle());
 
-        URL posterUrl = NetworkUtils.buildImageURL(NetworkUtils.ImageSize.W185, movie.getPosterPath());
+        if (movie.getPosterPath() != null && !movie.getPosterPath().isEmpty()) {
+            URL posterUrl = NetworkUtils.buildImageURL(NetworkUtils.ImageSize.W185, movie.getPosterPath());
 
-        Picasso.with(context)
-                .load(posterUrl.toString())
-                .into(holder.mPosterImage);
+            Picasso.with(context)
+                    .load(posterUrl.toString())
+                    .into(holder.mPosterImage);
+        } else {
+            holder.mPosterImage.setImageResource(R.drawable.no_poster);
+        }
     }
 
     @Override

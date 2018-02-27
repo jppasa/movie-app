@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 /**
  * Created by Juan Pablo Villegas on 2/24/2018.
- * Model for a Movie
+ * Model for a single Movie.
  */
 
 public class Movie implements Parcelable {
@@ -25,7 +25,7 @@ public class Movie implements Parcelable {
         this.id = id;
     }
 
-    protected Movie(Parcel in) {
+    private Movie(Parcel in) {
         id = in.readLong();
         video = in.readByte() != 0;
         voteCount = in.readInt();

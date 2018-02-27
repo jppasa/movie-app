@@ -11,7 +11,7 @@ import gt.com.jpvr.movieapp.models.Movie;
 
 /**
  * Created by Juan Pablo Villegas on 2/24/2018.
- *
+ * Utility class to handle JSON operations with Movie objects.
  */
 
 public class MoviesJsonUtils {
@@ -52,10 +52,8 @@ public class MoviesJsonUtils {
      *
      * @param movieJson JSONObject that contains the movie data
      * @return Movie object describing the parsed movie
-     *
-     * @throws JSONException If JSON data cannot be properly parsed
      */
-    public static Movie parseSingleMovie(JSONObject movieJson) throws JSONException {
+    public static Movie parseSingleMovie(JSONObject movieJson) {
         final String MDB_ID = "id";
         final String MDB_VIDEO = "video";
         final String MDB_VOTE_COUNT = "vote_count";
@@ -67,7 +65,6 @@ public class MoviesJsonUtils {
         final String MDB_ORIGINAL_TITLE = "original_title";
         final String MDB_OVERVIEW = "overview";
         final String MDB_RELEASE_DATE = "release_date";
-
 
         if (movieJson.has(MDB_ID)) {
             /* Movie should have at least an id to be valid */
