@@ -12,8 +12,8 @@ import java.net.URL;
 import java.util.Locale;
 
 import gt.com.jpvr.movieapp.models.Movie;
-import gt.com.jpvr.movieapp.untilities.NetworkUtils;
-import gt.com.jpvr.movieapp.untilities.NetworkUtils.ImageSize;
+import gt.com.jpvr.movieapp.utilities.NetworkUtils;
+import gt.com.jpvr.movieapp.utilities.NetworkUtils.ImageSize;
 
 public class DetailActivity extends AppCompatActivity {
 

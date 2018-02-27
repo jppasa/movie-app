@@ -15,7 +15,7 @@ import java.util.List;
 
 import gt.com.jpvr.movieapp.R;
 import gt.com.jpvr.movieapp.models.Movie;
-import gt.com.jpvr.movieapp.untilities.NetworkUtils;
+import gt.com.jpvr.movieapp.utilities.NetworkUtils;
 
 /**
  * Created by Juan Pablo Villegas on 2/24/2018.

@@ -19,9 +19,9 @@ import java.util.List;
 
 import gt.com.jpvr.movieapp.adapters.MovieAdapter;
 import gt.com.jpvr.movieapp.models.Movie;
-import gt.com.jpvr.movieapp.untilities.MoviesJsonUtils;
-import gt.com.jpvr.movieapp.untilities.NetworkUtils;
-import gt.com.jpvr.movieapp.untilities.NetworkUtils.SortCriteria;
+import gt.com.jpvr.movieapp.utilities.MoviesJsonUtils;
+import gt.com.jpvr.movieapp.utilities.NetworkUtils;
+import gt.com.jpvr.movieapp.utilities.NetworkUtils.SortCriteria;
 
 public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
 

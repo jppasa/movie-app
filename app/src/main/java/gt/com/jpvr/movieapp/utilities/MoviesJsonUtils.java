@@ -1,4 +1,4 @@
-package gt.com.jpvr.movieapp.untilities;
+package gt.com.jpvr.movieapp.utilities;
 
 import org.json.JSONArray;
 import org.json.JSONException;
