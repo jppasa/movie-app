@@ -1,8 +1,12 @@
 package gt.com.jpvr.movieapp;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,9 +27,13 @@ import gt.com.jpvr.movieapp.utilities.MoviesJsonUtils;
 import gt.com.jpvr.movieapp.utilities.NetworkUtils;
 import gt.com.jpvr.movieapp.utilities.NetworkUtils.SortCriteria;
 
-public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
+public class MainActivity extends AppCompatActivity implements
+        MovieAdapter.MovieAdapterOnClickHandler,
+        LoaderManager.LoaderCallbacks<List<Movie>> {
 
     private static final int COLUMN_COUNT = 2;
+    private static final String ARGS_CRITERIA = "criteria";
+    private static final int MOVIE_LOADER_ID = 1;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mMoviesRecyclerView;
@@ -81,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
                 if (!newCriteria.equals(mCurrentCriteria)) {
                     mCurrentCriteria = newCriteria;
+
                     loadMovies();
                 }
             }
@@ -93,6 +102,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         return true;
     }
 
+    private void invalidateData() {
+        mMovieAdapter.setMovieData(null);
+    }
+
     /**
      * Show progress bar and run AsyncTask to fetch movies from server with the sorting criteria
      * the user has selected.
@@ -100,7 +113,12 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private void loadMovies() {
         showMovies();
 
-        new FetchMovieList().execute(mCurrentCriteria.toString());
+        Bundle bundleForLoader = new Bundle();
+        bundleForLoader.putString(ARGS_CRITERIA, mCurrentCriteria.toString());
+
+//        invalidateData();
+//        getSupportLoaderManager().initLoader(MOVIE_LOADER_ID, bundleForLoader, MainActivity.this);
+        getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, bundleForLoader, MainActivity.this);
     }
 
     /**
@@ -134,6 +152,64 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         intent.putExtra(DetailActivity.EXTRA_MOVIE, movie);
         startActivity(intent);
     }
+
+    /**
+     * Loader of a movie list from The Movie DB according to a {@code SortCriteria}.
+     */
+    @SuppressWarnings("unchecked")
+    @SuppressLint("StaticFieldLeak")
+    @Override
+    public Loader<List<Movie>> onCreateLoader(int id, final Bundle args) {
+
+        return new AsyncTaskLoader<List<Movie>>(this) {
+            List<Movie> mMovies = null;
+
+            @Override
+            protected void onStartLoading() {
+                if (mMovies != null) {
+                    deliverResult(mMovies);
+                } else {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                    forceLoad();
+                }
+            }
+
+
+            @Override
+            public List<Movie> loadInBackground() {
+                String criteria = args.getString(ARGS_CRITERIA);
+                URL moviesUrl = NetworkUtils.buildMoviesUrl(criteria);
+
+                try {
+                    String response = NetworkUtils.getResponseFromHttpUrl(moviesUrl);
+                    return MoviesJsonUtils.getMoviesFromJson(response);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            public void deliverResult(List<Movie> data) {
+                mMovies = data;
+                super.deliverResult(data);
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> data) {
+        mSwipeRefreshLayout.setRefreshing(false);
+
+        if (data == null || data.isEmpty()) {
+            showErrorMessage();
+        } else {
+            showMovies();
+            mMovieAdapter.setMovieData(data);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<Movie>> loader) { }
 
     /**
      * AsyncTask to fetch a list of movies according to the criteria selected by the user.

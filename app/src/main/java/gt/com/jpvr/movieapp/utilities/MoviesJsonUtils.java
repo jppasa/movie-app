@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import gt.com.jpvr.movieapp.models.Movie;
+import gt.com.jpvr.movieapp.models.Video;
 
 /**
  * Created by Juan Pablo Villegas on 2/24/2018.
@@ -53,7 +54,7 @@ public class MoviesJsonUtils {
      * @param movieJson JSONObject that contains the movie data
      * @return Movie object describing the parsed movie
      */
-    public static Movie parseSingleMovie(JSONObject movieJson) {
+    private static Movie parseSingleMovie(JSONObject movieJson) {
         final String MDB_ID = "id";
         final String MDB_VIDEO = "video";
         final String MDB_VOTE_COUNT = "vote_count";
@@ -111,6 +112,67 @@ public class MoviesJsonUtils {
             }
 
             return movie;
+        }
+
+        return null;
+    }
+
+    /**
+     * Parses JSON from a the movies db and returns an list of {@code Video}s.
+     *
+     * @param videosJsonStr JSON response from server
+     * @return List of Video objects
+     *
+     * @throws JSONException If JSON data cannot be properly parsed
+     */
+    public static List<Video> getVideosFromJson(String videosJsonStr) throws JSONException {
+        final String RESULTS = "results";
+
+        List<Video> parseVideos = new LinkedList<>();
+
+        JSONObject videosJson = new JSONObject(videosJsonStr);
+
+        if (videosJson.has(RESULTS)) {
+            JSONArray videosArray = videosJson.getJSONArray(RESULTS);
+
+            for (int i = 0; i < videosArray.length(); i++) {
+                Video video = parseSingleVideo(videosArray.getJSONObject(i));
+
+                /* If video was invalid (no id) continue with the next one */
+                if (video != null) {
+                    parseVideos.add(video);
+                }
+            }
+        }
+
+        return parseVideos;
+    }
+
+    /**
+     * Parses JSON from a the movies db and returns an list of {@code Video}s.
+     *
+     * @param videoJson JSONObject that contains the movie data
+     * @return Video object describing the parsed video
+     */
+    private static Video parseSingleVideo(JSONObject videoJson) {
+        final String ID = "id";
+        final String KEY = "key";
+        final String NAME = "name";
+        final String SITE = "site";
+        final String SIZE = "size";
+        final String TYPE = "type";
+
+        if (videoJson.has(ID)) {
+            /* Video should have at least an id to be valid */
+            Video video = new Video(videoJson.optInt(ID));
+
+            video.setKey(videoJson.optString(KEY));
+            video.setName(videoJson.optString(NAME));
+            video.setSite(videoJson.optString(SITE));
+            video.setSize(videoJson.optString(SIZE));
+            video.setType(videoJson.optString(TYPE));
+
+            return video;
         }
 
         return null;

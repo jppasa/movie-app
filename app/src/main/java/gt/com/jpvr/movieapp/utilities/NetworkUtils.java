@@ -17,12 +17,15 @@ import java.util.Scanner;
 public class NetworkUtils {
     private static final String BASE_URL = "http://api.themoviedb.org";
     private static final String MOVIE_PATH = "/3/movie";
+    private static final String VIDEOS_PATH = "videos";
+    private static final String REVIEWS_PATH = "reviews";
 
     private static final String IMAGE_BASE_URL = "http://image.tmdb.org";
     private static final String IMAGE_PATH = "/t/p";
 
     private final static String API_KEY_PARAM = "api_key";
     private static final String apiKey = "YOUR_API_KEY";
+//    private static final String apiKey = "";
 
     /**
      *  Defines the two possible criteria that the app handles.
@@ -89,6 +92,50 @@ public class NetworkUtils {
     public static URL buildImageURL(ImageSize size, String id) {
         Uri builtUri = Uri.parse(IMAGE_BASE_URL).buildUpon()
                 .path(IMAGE_PATH + size.value + id)
+                .build();
+
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return url;
+    }
+
+    /**
+     * Builds the URL used to fetch videos (clips and trailers) of a movie from The Movie DB.
+     *
+     * @return The URL to use to query the movie db server for video info.
+     */
+    public static URL buildVideosURL(String id) {
+        Uri builtUri = Uri.parse(BASE_URL).buildUpon()
+                .path(MOVIE_PATH)
+                .appendPath(id)
+                .appendPath(VIDEOS_PATH)
+                .appendQueryParameter(API_KEY_PARAM, apiKey)
+                .build();
+
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return url;
+    }
+
+    /**
+     * Builds the URL used to fetch review of a movie from The Movie DB.
+     *
+     * @return The URL to use to query the movie db server for reviews.
+     */
+    public static URL buildReviewsURL(String id) {
+        Uri builtUri = Uri.parse(BASE_URL).buildUpon()
+                .path(MOVIE_PATH)
+                .appendPath(id)
+                .appendPath(REVIEWS_PATH)
+                .appendQueryParameter(API_KEY_PARAM, apiKey)
                 .build();
 
         URL url = null;

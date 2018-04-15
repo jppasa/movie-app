@@ -7,5 +7,8 @@
     <string name="rating">Rating</string>
     <string name="overview">Overview</string>
     <string name="original_title_language">Original title</string>
+    <string name="trailers">Trailers</string>
+    <string name="see_reviews">See reviews</string>
+    <string name="play_video">Play video</string>
 
 </resources>

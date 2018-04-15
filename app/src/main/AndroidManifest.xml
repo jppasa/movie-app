@@ -21,11 +21,16 @@
         <activity
             android:name=".DetailActivity"
             android:parentActivityName=".MainActivity">
-
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value=".MainActivity" />
         </activity>
+
+        <provider
+            android:name=".data.MovieContentProvider"
+            android:authorities="gt.com.jpvr.movieapp"
+            android:enabled="true"
+            android:exported="false"></provider>
     </application>
 
 </manifest>
