@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
+import static gt.com.jpvr.movieapp.data.MovieContract.MovieEntry.COLUMN_SERVER_ID;
 import static gt.com.jpvr.movieapp.data.MovieContract.MovieEntry.TABLE_NAME;
 
 public class MovieContentProvider extends ContentProvider {
@@ -45,7 +46,8 @@ public class MovieContentProvider extends ContentProvider {
             case FAVORITE_MOVIES:
                 long id = db.insert(TABLE_NAME, null, values);
                 if ( id > 0 ) {
-                    returnUri = ContentUris.withAppendedId(MovieContract.MovieEntry.CONTENT_URI, id);
+                    Long serverId = values.getAsLong(COLUMN_SERVER_ID);
+                    returnUri = ContentUris.withAppendedId(MovieContract.MovieEntry.CONTENT_URI, serverId);
                 } else {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 }
@@ -68,7 +70,7 @@ public class MovieContentProvider extends ContentProvider {
 
         switch (match) {
             case FAVORITE_MOVIES:
-                retCursor =  db.query(TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+                retCursor = db.query(TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
                 break;
             case FAVORITE_MOVIE_WITH_ID:
                 retCursor = mMovieDbHelper.getReadableDatabase().query(
@@ -99,7 +101,7 @@ public class MovieContentProvider extends ContentProvider {
         switch (match) {
             case FAVORITE_MOVIE_WITH_ID:
                 String id = uri.getLastPathSegment();
-                entriesDeleted = db.delete(TABLE_NAME, "_id=?", new String[]{id});
+                entriesDeleted = db.delete(TABLE_NAME, COLUMN_SERVER_ID + " = ?", new String[]{id});
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -128,7 +130,7 @@ public class MovieContentProvider extends ContentProvider {
         switch (match) {
             case FAVORITE_MOVIE_WITH_ID:
                 String id = uri.getLastPathSegment();
-                entriesUpdated = db.update(TABLE_NAME, values, "_id=?", new String[]{id});
+                entriesUpdated = db.update(TABLE_NAME, values, COLUMN_SERVER_ID + " = ?", new String[]{id});
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);

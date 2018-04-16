@@ -8,4 +8,9 @@
         <item name="colorAccent">@color/accent</item>
     </style>
 
+    <style name="SmallTitle">
+        <item name="fontFamily">sans-serif-smallcaps</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/colorAccent</item>
+    </style>
 </resources>

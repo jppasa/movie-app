@@ -2,26 +2,30 @@ package gt.com.jpvr.movieapp;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.content.res.Configuration;
+import android.database.Cursor;
+import android.databinding.DataBindingUtil;
+import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.view.Display;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import java.net.URL;
+import java.util.LinkedList;
 import java.util.List;
 
 import gt.com.jpvr.movieapp.adapters.MovieAdapter;
+import gt.com.jpvr.movieapp.data.MovieContract;
+import gt.com.jpvr.movieapp.databinding.ActivityMainBinding;
 import gt.com.jpvr.movieapp.models.Movie;
 import gt.com.jpvr.movieapp.utilities.MoviesJsonUtils;
 import gt.com.jpvr.movieapp.utilities.NetworkUtils;
@@ -31,27 +35,26 @@ public class MainActivity extends AppCompatActivity implements
         MovieAdapter.MovieAdapterOnClickHandler,
         LoaderManager.LoaderCallbacks<List<Movie>> {
 
-    private static final int COLUMN_COUNT = 2;
     private static final String ARGS_CRITERIA = "criteria";
+    private static final String ARGS_CRITERIA_NAME = "name";
     private static final int MOVIE_LOADER_ID = 1;
-
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private RecyclerView mMoviesRecyclerView;
-    private TextView mErrorMessage;
 
     private MovieAdapter mMovieAdapter;
     private SortCriteria mCurrentCriteria;
 
+    ActivityMainBinding mBinding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         mCurrentCriteria = SortCriteria.POPULAR;
-
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.srl_movies);
-        mMoviesRecyclerView = (RecyclerView) findViewById(R.id.rv_movies);
-        mErrorMessage = (TextView) findViewById(R.id.tv_error_message);
+        if (savedInstanceState != null) {
+            String criteria = savedInstanceState.getString(ARGS_CRITERIA);
+            mCurrentCriteria = SortCriteria.valueOf(criteria);
+        }
 
         mMovieAdapter = new MovieAdapter(this, new MovieAdapter.MovieAdapterOnClickHandler() {
             @Override
@@ -60,18 +63,46 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
 
-        mMoviesRecyclerView.setLayoutManager(new GridLayoutManager(this, COLUMN_COUNT));
-        mMoviesRecyclerView.setAdapter(mMovieAdapter);
+        int columnCount = 2;
+        if (getScreenOrientation() == Configuration.ORIENTATION_LANDSCAPE) {
+            columnCount = 4;
+        }
 
-        mSwipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(this, R.color.accent));
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mBinding.rvMovies.setLayoutManager(new GridLayoutManager(this, columnCount));
+        mBinding.rvMovies.setAdapter(mMovieAdapter);
+
+        mBinding.swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(this, R.color.accent));
+        mBinding.swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                loadMovies();
+                loadMovies(true);
             }
         });
 
-        loadMovies();
+        loadMovies(false);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putString(ARGS_CRITERIA, mCurrentCriteria.name());
+    }
+
+    public int getScreenOrientation() {
+        Display screenOrientation = getWindowManager().getDefaultDisplay();
+        int orientation;
+
+        if (screenOrientation.getWidth() == screenOrientation.getHeight()) {
+            orientation = Configuration.ORIENTATION_SQUARE;
+        } else {
+            if (screenOrientation.getWidth() < screenOrientation.getHeight()) {
+                orientation = Configuration.ORIENTATION_PORTRAIT;
+            } else {
+                orientation = Configuration.ORIENTATION_LANDSCAPE;
+            }
+        }
+        return orientation;
     }
 
     @Override
@@ -83,14 +114,20 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 SortCriteria newCriteria = SortCriteria.POPULAR;
-                if (position == 1) {
-                    newCriteria = SortCriteria.TOP_RATED;
+
+                switch (position) {
+                    case 1:
+                        newCriteria = SortCriteria.TOP_RATED;
+                        break;
+                    case 2:
+                        newCriteria = SortCriteria.FAVORITES;
+                        break;
                 }
 
                 if (!newCriteria.equals(mCurrentCriteria)) {
                     mCurrentCriteria = newCriteria;
 
-                    loadMovies();
+                    loadMovies(true);
                 }
             }
 
@@ -98,6 +135,17 @@ public class MainActivity extends AppCompatActivity implements
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
+        int selection = 0;
+        switch (mCurrentCriteria) {
+            case TOP_RATED:
+                selection = 1;
+                break;
+            case FAVORITES:
+                selection = 2;
+                break;
+        }
+
+        criteriaSpinner.setSelection(selection);
 
         return true;
     }
@@ -110,31 +158,35 @@ public class MainActivity extends AppCompatActivity implements
      * Show progress bar and run AsyncTask to fetch movies from server with the sorting criteria
      * the user has selected.
      */
-    private void loadMovies() {
+    private void loadMovies(boolean forceReload) {
         showMovies();
 
         Bundle bundleForLoader = new Bundle();
         bundleForLoader.putString(ARGS_CRITERIA, mCurrentCriteria.toString());
+        bundleForLoader.putString(ARGS_CRITERIA_NAME, mCurrentCriteria.name());
 
 //        invalidateData();
-//        getSupportLoaderManager().initLoader(MOVIE_LOADER_ID, bundleForLoader, MainActivity.this);
-        getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, bundleForLoader, MainActivity.this);
+        if (forceReload) {
+            getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, bundleForLoader, MainActivity.this);
+        } else {
+            getSupportLoaderManager().initLoader(MOVIE_LOADER_ID, bundleForLoader, MainActivity.this);
+        }
     }
 
     /**
      * Hide error message and show recyclerView.
      */
     private void showMovies() {
-        mErrorMessage.setVisibility(View.INVISIBLE);
-        mMoviesRecyclerView.setVisibility(View.VISIBLE);
+        mBinding.tvErrorMessage.setVisibility(View.INVISIBLE);
+        mBinding.rvMovies.setVisibility(View.VISIBLE);
     }
 
     /**
      * Show error message and hide recyclerView.
      */
     private void showErrorMessage() {
-        mErrorMessage.setVisibility(View.VISIBLE);
-        mMoviesRecyclerView.setVisibility(View.GONE);
+        mBinding.tvErrorMessage.setVisibility(View.VISIBLE);
+        mBinding.rvMovies.setVisibility(View.GONE);
     }
 
     @Override
@@ -169,23 +221,28 @@ public class MainActivity extends AppCompatActivity implements
                 if (mMovies != null) {
                     deliverResult(mMovies);
                 } else {
-                    mSwipeRefreshLayout.setRefreshing(true);
+                    mBinding.swipeRefreshLayout.setRefreshing(true);
                     forceLoad();
                 }
             }
 
-
             @Override
             public List<Movie> loadInBackground() {
-                String criteria = args.getString(ARGS_CRITERIA);
-                URL moviesUrl = NetworkUtils.buildMoviesUrl(criteria);
+                String criteriaStr = args.getString(ARGS_CRITERIA);
+                SortCriteria criteria = SortCriteria.valueOf(args.getString(ARGS_CRITERIA_NAME));
 
-                try {
-                    String response = NetworkUtils.getResponseFromHttpUrl(moviesUrl);
-                    return MoviesJsonUtils.getMoviesFromJson(response);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
+                if (criteria == SortCriteria.POPULAR || criteria == SortCriteria.TOP_RATED) {
+                    URL moviesUrl = NetworkUtils.buildMoviesUrl(criteriaStr);
+
+                    try {
+                        String response = NetworkUtils.getResponseFromHttpUrl(moviesUrl);
+                        return MoviesJsonUtils.getMoviesFromJson(response);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                } else {
+                    return queryFavorites();
                 }
             }
 
@@ -196,9 +253,56 @@ public class MainActivity extends AppCompatActivity implements
         };
     }
 
+    private List<Movie> queryFavorites() {
+        try {
+            Cursor cursor = getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI, null, null, null,null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                LinkedList<Movie> list = new LinkedList<>();
+
+                int serverIdIndex = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_SERVER_ID);
+                int hasVideoIndex = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_HAS_VIDEO);
+                int voteCountIndex = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_VOTE_COUNT);
+                int voteAverageIndex = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE);
+                int titleIndex = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_TITLE);
+                int popularityIndex = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_POPULARITY);
+                int posterPathIndex = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH);
+                int originalLanguageIndex = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_ORIGINAL_LANGUAGE);
+                int originalTitleIndex = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE);
+                int overviewIndex = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_OVERVIEW);
+                int releaseDateIndex = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_RELEASE_DATE);
+
+                while (!cursor.isAfterLast()) {
+                    Movie movie = new Movie(cursor.getLong(serverIdIndex));
+
+                    movie.setHasVideo(cursor.getInt(hasVideoIndex) == 1);
+                    movie.setVoteCount(cursor.getInt(voteCountIndex));
+                    movie.setVoteAverage(cursor.getDouble(voteAverageIndex));
+                    movie.setTitle(cursor.getString(titleIndex));
+                    movie.setPopularity(cursor.getDouble(popularityIndex));
+                    movie.setPosterPath(cursor.getString(posterPathIndex));
+                    movie.setOriginalLanguage(cursor.getString(originalLanguageIndex));
+                    movie.setOriginalTitle(cursor.getString(originalTitleIndex));
+                    movie.setOverview(cursor.getString(overviewIndex));
+                    movie.setReleaseDate(cursor.getString(releaseDateIndex));
+
+                    list.add(movie);
+                    cursor.moveToNext();
+                }
+
+                cursor.close();
+                return list;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     @Override
     public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> data) {
-        mSwipeRefreshLayout.setRefreshing(false);
+        mBinding.swipeRefreshLayout.setRefreshing(false);
 
         if (data == null || data.isEmpty()) {
             showErrorMessage();
@@ -210,45 +314,4 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onLoaderReset(Loader<List<Movie>> loader) { }
-
-    /**
-     * AsyncTask to fetch a list of movies according to the criteria selected by the user.
-     */
-    public class FetchMovieList extends AsyncTask<String, Void, List<Movie>> {
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mSwipeRefreshLayout.setRefreshing(true);
-        }
-
-        @Override
-        protected List<Movie> doInBackground(String... params) {
-            if (params.length == 0) return null;
-
-            String criteria = params[0];
-            URL moviesUrl = NetworkUtils.buildMoviesUrl(criteria);
-
-            try {
-                String response = NetworkUtils.getResponseFromHttpUrl(moviesUrl);
-                return MoviesJsonUtils.getMoviesFromJson(response);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(List<Movie> movies) {
-            mSwipeRefreshLayout.setRefreshing(false);
-
-            if (movies == null || movies.isEmpty()) {
-                showErrorMessage();
-            } else {
-                showMovies();
-                mMovieAdapter.setMovieData(movies);
-            }
-
-            super.onPostExecute(movies);
-        }
-    }
 }

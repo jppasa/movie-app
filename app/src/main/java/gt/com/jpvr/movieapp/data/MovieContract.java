@@ -14,12 +14,10 @@ public class MovieContract {
     // The base content URI = "content://" + <authority>
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 
-    // Define the possible paths for accessing data in this contract
-    // This is the path for the "tasks" directory
     // TODO should it be named "favorites"?
     public static final String PATH_FAVORITES = "favorites";
 
-    /* MovieEntry is an inner class that defines the contents of the task table */
+     /* MovieEntry is an inner class that defines the contents of the task table */
     public static final class MovieEntry implements BaseColumns {
 
         // MovieEntry content URI = base content URI + path

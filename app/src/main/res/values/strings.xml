@@ -2,6 +2,7 @@
     <string name="app_name">Awesome Movies</string>
     <string name="movie_poster">Movie poster</string>
     <string name="error_message">Movies could not be loaded</string>
+    <string name="error_message_reviews">Reviews could not be loaded</string>
     <string name="sort_criteria">Sort criteria</string>
     <string name="release_date">Release date</string>
     <string name="rating">Rating</string>
@@ -10,5 +11,9 @@
     <string name="trailers">Trailers</string>
     <string name="see_reviews">See reviews</string>
     <string name="play_video">Play video</string>
+    <string name="favorite">Favorite</string>
+    <string name="removed_from_favorites">Removed from favorites.</string>
+    <string name="added_to_favorites">Added to favorites.</string>
+    <string name="reviews">Reviews</string>
 
 </resources>

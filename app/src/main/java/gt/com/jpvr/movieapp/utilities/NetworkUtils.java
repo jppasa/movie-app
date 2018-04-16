@@ -31,7 +31,7 @@ public class NetworkUtils {
      *  Defines the two possible criteria that the app handles.
      */
     public enum SortCriteria {
-        POPULAR("popular"), TOP_RATED("top_rated");
+        POPULAR("popular"), TOP_RATED("top_rated"), FAVORITES("favorites");
 
         private final String value;
         SortCriteria(String s) {

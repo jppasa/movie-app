@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import gt.com.jpvr.movieapp.models.Movie;
+import gt.com.jpvr.movieapp.models.Review;
 import gt.com.jpvr.movieapp.models.Video;
 
 /**
@@ -151,7 +152,7 @@ public class MoviesJsonUtils {
     /**
      * Parses JSON from a the movies db and returns an list of {@code Video}s.
      *
-     * @param videoJson JSONObject that contains the movie data
+     * @param videoJson JSONObject that contains the video data
      * @return Video object describing the parsed video
      */
     private static Video parseSingleVideo(JSONObject videoJson) {
@@ -177,4 +178,61 @@ public class MoviesJsonUtils {
 
         return null;
     }
+
+    /**
+     * Parses JSON from a the movies db and returns an list of {@code Review}s.
+     *
+     * @param reviewsJsonStr JSON response from server
+     * @return List of Review objects
+     *
+     * @throws JSONException If JSON data cannot be properly parsed
+     */
+    public static List<Review> getReviewsFromJson(String reviewsJsonStr) throws JSONException {
+        final String RESULTS = "results";
+
+        List<Review> reviews = new LinkedList<>();
+
+        JSONObject reviewsJson = new JSONObject(reviewsJsonStr);
+
+        if (reviewsJson.has(RESULTS)) {
+            JSONArray reviewsArray = reviewsJson.getJSONArray(RESULTS);
+
+            for (int i = 0; i < reviewsArray.length(); i++) {
+                Review review = parseSingleReview(reviewsArray.getJSONObject(i));
+
+                /* If video was invalid (no id) continue with the next one */
+                if (review != null) {
+                    reviews.add(review);
+                }
+            }
+        }
+
+        return reviews;
+    }
+
+    /**
+     * Parses JSON from a the movies db and returns an list of {@code Review}s.
+     *
+     * @param reviewJson JSONObject that contains the reviews
+     * @return Review object describing the parsed review
+     */
+    private static Review parseSingleReview(JSONObject reviewJson) {
+        final String ID = "id";
+        final String AUTHOR = "author";
+        final String CONTENT = "content";
+
+        if (reviewJson.has(ID)) {
+            /* Review should have at least an id to be valid */
+            Review review = new Review(reviewJson.optInt(ID));
+
+            review.setAuthor(reviewJson.optString(AUTHOR));
+            review.setContent(reviewJson.optString(CONTENT));
+
+            return review;
+        }
+
+        return null;
+    }
+
+
 }
