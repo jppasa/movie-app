@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final String ARGS_CRITERIA = "criteria";
     private static final String ARGS_CRITERIA_NAME = "name";
     private static final int MOVIE_LOADER_ID = 1;
+    private static final int REQUEST_CODE_MOVIE = 1;
 
     private MovieAdapter mMovieAdapter;
     private SortCriteria mCurrentCriteria;
@@ -150,10 +151,6 @@ public class MainActivity extends AppCompatActivity implements
         return true;
     }
 
-    private void invalidateData() {
-        mMovieAdapter.setMovieData(null);
-    }
-
     /**
      * Show progress bar and run AsyncTask to fetch movies from server with the sorting criteria
      * the user has selected.
@@ -165,7 +162,6 @@ public class MainActivity extends AppCompatActivity implements
         bundleForLoader.putString(ARGS_CRITERIA, mCurrentCriteria.toString());
         bundleForLoader.putString(ARGS_CRITERIA_NAME, mCurrentCriteria.name());
 
-//        invalidateData();
         if (forceReload) {
             getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, bundleForLoader, MainActivity.this);
         } else {
@@ -202,7 +198,17 @@ public class MainActivity extends AppCompatActivity implements
     private void launchDetailView(Movie movie) {
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra(DetailActivity.EXTRA_MOVIE, movie);
-        startActivity(intent);
+        startActivityForResult(intent, REQUEST_CODE_MOVIE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE_MOVIE) {
+            if (resultCode == RESULT_OK && mCurrentCriteria == SortCriteria.FAVORITES) {
+                loadMovies(true);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     /**
@@ -253,6 +259,10 @@ public class MainActivity extends AppCompatActivity implements
         };
     }
 
+    /**
+     * Queries the content provider for all the movies marked as favorites.
+     * @return a List of Movie objects that are stored in the db.
+     */
     private List<Movie> queryFavorites() {
         try {
             Cursor cursor = getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI, null, null, null,null);

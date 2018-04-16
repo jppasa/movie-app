@@ -169,7 +169,6 @@
                     style="@style/SmallTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
                     android:text="@string/trailers" />
 
                 <ProgressBar
@@ -179,12 +178,11 @@
                     android:layout_gravity="center_horizontal" />
             </LinearLayout>
 
-
             <LinearLayout
                 android:id="@+id/reviewsLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:orientation="vertical"
                 android:paddingBottom="16dp"
                 app:layout_constraintEnd_toEndOf="@+id/trailersLayout"
@@ -195,7 +193,6 @@
                     style="@style/SmallTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
                     android:text="@string/reviews" />
 
                 <ProgressBar

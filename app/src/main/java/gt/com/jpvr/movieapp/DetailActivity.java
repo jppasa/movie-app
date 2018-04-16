@@ -3,7 +3,6 @@ package gt.com.jpvr.movieapp;
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
@@ -149,6 +148,10 @@ public class DetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Toggles between this movie being favorite or not.
+     * @param item is the MenuItem used to toggle the "favorite" state.
+     */
     private void toggleFavorite(MenuItem item) {
         if (isFavorite) {
             removeFromFavorites(item);
@@ -157,6 +160,10 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Removes this movie from the favorites list (in db).
+     * @param item is the MenuItem used to toggle the "favorite" state.
+     */
     private void removeFromFavorites(MenuItem item) {
         Uri uri = MovieContract.MovieEntry.buildMovieUriFromId(mMovie.getId());
 
@@ -166,10 +173,15 @@ public class DetailActivity extends AppCompatActivity {
             Snackbar.make(mDetailBinding.ivMoviePoster, R.string.removed_from_favorites, Snackbar.LENGTH_LONG).show();
             item.setIcon(R.drawable.ic_favorite_border_white_24dp);
 
+            setResult(RESULT_OK);
             isFavorite = false;
         }
     }
 
+    /**
+     * Adds this movie to the favorites list (in db).
+     * @param item is the MenuItem used to toggle the "favorite" state.
+     */
     private void addToFavorites(MenuItem item) {
         ContentValues contentValues = new ContentValues();
 
@@ -191,6 +203,7 @@ public class DetailActivity extends AppCompatActivity {
             Snackbar.make(mDetailBinding.ivMoviePoster, R.string.added_to_favorites, Snackbar.LENGTH_LONG).show();
             item.setIcon(R.drawable.ic_favorite_white_24dp);
 
+            setResult(RESULT_OK);
             isFavorite = true;
         }
     }
@@ -248,6 +261,11 @@ public class DetailActivity extends AppCompatActivity {
 //        }
 //    }
 
+    /**
+     * Creates a view defined by {@code R.id.video_item_layout} and populates it with the corresponding
+     * values that come in {@code video}.
+     * @param video the Video to use to fill the views.
+     */
     private void populateVideoLayout(final Video video) {
         View videoView = View.inflate(this, R.layout.video_item_layout, null);
 
@@ -257,13 +275,18 @@ public class DetailActivity extends AppCompatActivity {
         videoView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                watchYoutubeVideo(DetailActivity.this, video.getKey());
+                watchYoutubeVideo(video.getKey());
             }
         });
 
         mDetailBinding.trailersLayout.addView(videoView);
     }
 
+    /**
+     * Creates a view defined by {@code R.id.review_item_layout} and populates it with the corresponding
+     * values that come in {@code review}.
+     * @param review the Review to use to fill the views.
+     */
     private void populateReviewLayout(final Review review) {
         View itemView = View.inflate(this, R.layout.review_item_layout, null);
 
@@ -276,14 +299,18 @@ public class DetailActivity extends AppCompatActivity {
         mDetailBinding.reviewsLayout.addView(itemView);
     }
 
-    public static void watchYoutubeVideo(Context context, String id){
+    /**
+     * Launches Youtube app or web view of the video that corresponds to the {@code id}.
+     * @param id is the Youtube's key that corresponds to the video.
+     */
+    public void watchYoutubeVideo(String id){
         Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + id));
         Intent webIntent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse("http://www.youtube.com/watch?v=" + id));
         try {
-            context.startActivity(appIntent);
+            startActivity(appIntent);
         } catch (ActivityNotFoundException ex) {
-            context.startActivity(webIntent);
+            startActivity(webIntent);
         }
     }
 
@@ -296,6 +323,9 @@ public class DetailActivity extends AppCompatActivity {
 //        startActivity(intent);
 //    }
 
+    /**
+     * LoaderCallbacks to load a videos of this movie.
+     */
     private LoaderCallbacks<List<Video>> videosLoaderCallbacks = new LoaderCallbacks<List<Video>>() {
         @SuppressLint("StaticFieldLeak")
         @Override
@@ -355,6 +385,9 @@ public class DetailActivity extends AppCompatActivity {
     };
 
 
+    /**
+     * LoaderCallbacks to load a reviews of this movie.
+     */
     private LoaderCallbacks<List<Review>> reviewsLoaderCallbacks = new LoaderCallbacks<List<Review>>() {
         @SuppressLint("StaticFieldLeak")
         @Override
